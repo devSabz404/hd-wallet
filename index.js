@@ -52,5 +52,35 @@ const master = async () => {
 
 master()
 
+const bitcoin = require('bitcoinjs-lib');
+const crypto = require('crypto');
+
+// Generate a random 32-byte private key
+const privateKey = crypto.randomBytes(32);
+
+// Derive the corresponding public key and address
+const keyPair = bitcoin.ECPair.fromPrivateKey(privateKey);
+const publicKey = keyPair.publicKey;
+const address = bitcoin.payments.p2pkh({ pubkey: publicKey }).address;
+
+console.log(`Private key: ${privateKey.toString('hex')}`);
+console.log(`Address: ${address}`);
+
+async function spendUTXO(utxo, recipientAddress, amount) {
+  // Build a transaction to spend the UTXO
+  const tx = new bitcoin.TransactionBuilder();
+  tx.addInput(utxo.txid, utxo.vout);
+  tx.addOutput(recipientAddress, amount);
+  tx.sign(0, keyPair);
+
+  // Broadcast the transaction to the network
+  const txHex = tx.build().toHex();
+  // You would replace this with code to actually broadcast the transaction
+  console.log(`Transaction hex: ${txHex}`);
+}
+
+// Example usage
+spendUTXO({ txid: 'abc', vout: 0 }, '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2', 1000);
+
 
 

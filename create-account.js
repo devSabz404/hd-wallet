@@ -7,15 +7,20 @@ const axios = require('axios');
 const Bitcore = require('bitcore-lib');
 
 
-function mPhrase(){
-    const entropy = crypto.randomBytes(16).toString('hex');
-    const mnemonic = bip39.entropyToMnemonic(entropy);
-    return mnemonic
-}
+async function getUtxo(address) {
+    const url = `https://api.blockcypher.com/v1/btc/main/addrs/${address}/full`;
+    const response = await axios.get(url);
+   
+    console.log("balance: ",response.data)
+    return response.data.txs;
+  }
 
-function createAccount(mnemonicPhrase, passphrase = '') {
-  
-  const seed = bip39.mnemonicToSeedSync(mnemonicPhrase, passphrase);
+
+
+function createAccount(passphrase) {
+  const entropy = crypto.randomBytes(16).toString('hex');
+  const mnemonic = bip39.entropyToMnemonic(entropy);
+  const seed = bip39.mnemonicToSeedSync(mnemonic, passphrase);
 
   const root = HDKey.fromMasterSeed(Buffer.from(seed, 'hex'));
 
